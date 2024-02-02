@@ -1,111 +1,98 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import IngList from './IngList'
 import BurgerPane from './BurgerPane'
 
-// class components are a little different than function components
-// they use class style conventions (properties, and methods)
-// we have to do things using class style syntaxes(as opposed to function syntax)
-// we'll have a bunch of key:value pairs and methods
-// state in a class component is held within an object.
+// First thing we do when converting from class components to function components, is identify what needs to be a state hook and what doesnt.
+// helpful to run a find for 'setState' and identify everything that setState interacts with.
+// in this app, it's JUST the burgerIngredients, not the original ingredients array.
+// Then we need to analyze the differences in syntaz between classes and functions.
+// which means removing all references to 'this' , 'this.state' etc
+// then, our render method will go away, and be replaced by a return from the funcion component.
+// look for props with a find, and if its not there, no need to add props as a parameter.
 
-// to use a class, we have to extend the component class that we bring in from react.
-export default class BurgerStacker extends Component {
-    // if you want to hold state in a class component, you use an object.
-    // from there, we can update our state with a function called, setState
-    // another feature of class components, is the keyword 'this'
-    // we need to use this when referring to builtin functions, properties, and methods.
-    state = {
-        // my main list of potential ingredients
-        // both these pieces of state will be passed down to child components
-        ingredients: [
-            {name: 'Kaiser Bun', color: 'saddlebrown'},
-            {name: 'Sesame Bun', color: 'sandybrown'},
-            {name: 'Gluten Free Bun', color: 'peru'},
-            {name: 'Lettuce Wrap', color: 'olivedrab'},
-            {name: 'Beef Patty', color: '#3F250B'},
-            {name: 'Soy Patty', color: '#3F250B'},
-            {name: 'Black Bean Patty', color: '#3F250B'},
-            {name: 'Chicken Patty', color: 'burlywood'},
-            {name: 'Lettuce', color: 'lawngreen'},
-            {name: 'Tomato', color: 'tomato'},
-            {name: 'Bacon', color: 'maroon'},
-            {name: 'Onion', color: 'lightyellow'},
-            {name: 'Cheese', color: 'gold'},
-        ],
-        // going to be the ingredients on the burger that I'm stacking
-        burgerIngredients: []
-    }
 
-    // this aarea will hold our state manipulating functions
-    // we will pass these functions as props to the correct components to mke this app work the waay we want it to 
-    addToStack = (e) => {
-        // this method targets the properties of an ingredient
-        // those properties change based on which on is clicked
-        // we use those to build an object that resembles the original ingredient -> {name: 'something', color: 'some color"}
-        // then, we will ad tht object to the burgerIngredients array
-        // and bc we pass that array to BurgerPane, it will be looped over and render an Ingredient component for each item in the array
+const  BurgerStacker = () =>{
+
+
+    const ingredients = [
+        {name: 'Kaiser Bun', color: 'saddlebrown'},
+        {name: 'Sesame Bun', color: 'sandybrown'},
+        {name: 'Gluten Free Bun', color: 'peru'},
+        {name: 'Lettuce Wrap', color: 'olivedrab'},
+        {name: 'Beef Patty', color: '#3F250B'},
+        {name: 'Soy Patty', color: '#3F250B'},
+        {name: 'Black Bean Patty', color: '#3F250B'},
+        {name: 'Chicken Patty', color: 'burlywood'},
+        {name: 'Lettuce', color: 'lawngreen'},
+        {name: 'Tomato', color: 'tomato'},
+        {name: 'Bacon', color: 'maroon'},
+        {name: 'Onion', color: 'lightyellow'},
+        {name: 'Cheese', color: 'gold'},
+    ]
+    // burger ingredients needs to be set up as a hook
+    // burgerIngredients: []
+    // we'll use useState to set up the burgerIngredients as a hook and give a starting value
+    // the parts of the useState hook, for reference, are:
+    // const [state, setState] = useState(initialState)
+    const [burgerIngredients, setBurgerIngredients] = useState([])
+    
+
+    const addToStack = (e) => {
         const ingName = e.target.innerText
         const ingColor = e.target.style.backgroundColor
 
         console.log(`clicked ${ingName} and it is ${ingColor}`)
-        // class components use a special method to update their state
-        // this method is call "setState"
-        // setState is expecting an object, and within that object, we can refer to an indiviual piece of staate to update
-        // the line in there is saying, grab all the burgerIngredients, keep then in the aarray, and add the new ingredient to the front of the array
-        this.setState({
-            burgerIngredients: [{ name: ingName, color: ingColor }, ...this.state.burgerIngredients ]
-        })
+
+        // the old way of updating state with classes
+        // this.setState({
+        //     burgerIngredients: [{ name: ingName, color: ingColor }, ...this.state.burgerIngredients ]
+        // })
+        // instead, with function components, we use the updater function initialized with the useState
+        setBurgerIngredients([{ name: ingName, color: ingColor }, ...burgerIngredients])
     }
 
-    // this method removes a single ingredient from aa burger
-    removeFromStack = (e) => {
-        console.log('the original burgerIngredients', this.state.burgerIngredients)
-        // taarget a specific element in the burgerIngredients array
-        // maybe we need the index?
+    const removeFromStack = (e) => {
         const clickIndex = e.target.id
-        console.log('the click index?', clickIndex)
-
-        // once we have our specific item targeted, remove it from array
-        // make sure that the array in state is accuraately updating
-        // create aa copy of the original array 
-        const currBurger = this.state.burgerIngredients.slice()
-        console.log('this is the current burger', currBurger)
-        // update the copy of the array correctly -> remvoing the targeted item
+        const currBurger = burgerIngredients.slice()
         currBurger.splice(clickIndex, 1)
-        console.log('this is the current burger - aafter splice', currBurger)
-        // then, overwrite that array in state with the newly update copy
-        this.setState({
-            burgerIngredients: currBurger
-        })
+        // this is the old way of setting state
+        // this.setState({
+        //     burgerIngredients: currBurger
+        // })
+        // we call our updater function with the new value of the state
+        setBurgerIngredients(currBurger)
     }
 
-    // this clears the burgerIngredients array, effectively clearing the burger
-    clearBurger = () => {
-        this.setState({
-            burgerIngredients: []
-        })
+    const clearBurger = () => {
+        // this.setState({
+        //     burgerIngredients: []
+        // })
+        // the new (function component) way of setting state
+        setBurgerIngredients([])
     }
 
-    // there is one thing that all class components need to do
-    // they need to call the render method. Just like all function components need to return something. 
-    render () {
-        console.log('this is burgerIngredients', this.state.burgerIngredients)
-        // whatever we return from the render method is the jsx we see on the page
-        return (
-            <>
-                <h1>Burger Stacker</h1>
-                <div className='panes'>
-                    <IngList 
-                        ingredients={this.state.ingredients}
-                        add={this.addToStack}
-                    />
-                    <BurgerPane 
-                        ingredients={this.state.burgerIngredients}
-                        clear={this.clearBurger}
-                        remove={this.removeFromStack}
-                    />
-                </div>
-            </>
-        )
-    }
+    // we will adress render() in the return statement of the function component
+    // we identify the opening and closing curlies for the render method
+    // and then remove the render method and the return statement
+    // render () {
+
+    // after that we look through our return, and identify anything that needs to be changed from 'this' to the new state hook
+    return (
+        <>
+            <h1>Burger Stacker</h1>
+            <div className='panes'>
+                <IngList 
+                    ingredients={ingredients}
+                    add={addToStack}
+                />
+                <BurgerPane 
+                    ingredients={burgerIngredients}
+                    clear={clearBurger}
+                    remove={removeFromStack}
+                />
+            </div>
+        </>
+    )
 }
+
+export default BurgerStacker
